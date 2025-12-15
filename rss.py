@@ -10,12 +10,12 @@ from google.genai import types
 
 # ==== Gemini クライアントを1回だけ作る ====
 # 事前に PowerShell などで:
-#   $env:GEMINI_API_KEY = "ここに本物のキー"
-#api_key = os.environ.get("GEMINI_API_KEY")
-#if not api_key:
-#    raise RuntimeError("GEMINI_API_KEY が環境変数に設定されていません")
+   $env:GEMINI_API_KEY = "ここに本物のキー"
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY が環境変数に設定されていません")
 
-#client = genai.Client(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
 
 # ==============================
@@ -204,3 +204,4 @@ with open("all_topics.json", "w", encoding="utf-8") as f:
     json.dump(all_topics, f, indent=4, ensure_ascii=False)
 
 print("all_topics.json を更新しました。")
+
