@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ニュースアプリ</title>
+  <link rel="stylesheet" href="index.css" />
+  <!-- Vue本体（ここだけでOK。APIキーは絶対に書かない） -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1 class="title">最新ニュース一覧</h1>
+
+    <!-- カテゴリ選択 -->
+    <div class="filter">
+      <label for="category">カテゴリを選択：</label>
+      <select id="category" v-model="selectedCategory">
+        <option v-for="cat in categories" :key="cat" :value="cat">
+          {{ cat }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 読み込み中表示 -->
+    <p v-if="loading">読み込み中...</p>
+    <!-- エラー表示 -->
+    <p v-if="error" class="error">{{ error }}</p>
+
+    <!-- 記事一覧 -->
+    <ul class="article" v-if="!loading && !error">
+      <li class="article-item" v-for="(article, index) in filteredArticles" :key="index">
+        <h2 class="article-title">
+          <a :href="article.link" target="_blank" rel="noopener">
+            {{ article.title }}
+          </a>
+        </h2>
+        <p class="article-description">
+          {{ article.description }}
+        </p>
+        <ul class="article-tags">
+          <li
+            class="article-tag"
+            v-for="(tag, tIndex) in article.tags"
+            :key="tIndex"
+          >
+            {{ tag }}
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      articles: [],
+      loading: true,
+      error: '',
+      // ★ここを固定カテゴリにする
+      categories: ['すべて', '政治', '経済' , 'スポーツ', 'IT', 'AI' ],
+      selectedCategory: 'すべて',
+    },
+    computed: {
+      filteredArticles() {
+        // 「すべて」のときは全件
+        if (this.selectedCategory === 'すべて') {
+          return this.articles;
+        }
+        // 記事の tags に選択中カテゴリが含まれるものだけ表示
+        return this.articles.filter(article =>
+          Array.isArray(article.tags) &&
+          article.tags.includes(this.selectedCategory)
+        );
+      }
+    },
+    mounted() {
+      fetch('all_topics.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('HTTPエラー: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.articles = data;
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          this.error = '記事の読み込みに失敗しました';
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    }
+  });
+</script>
+
+</body>
+</html>
